@@ -26,16 +26,27 @@ Este é um sistema desenvolvido para a Polícia Civil do Ceará (PCCE) para gere
    ```
 
 3. **Configure as variáveis de ambiente:**
-   - Copie o arquivo `.env.example` para um novo arquivo chamado `.env`:
-     ```bash
-     cp .env.example .env
+   - Crie um arquivo chamado `.env.local` na raiz do projeto.
+   - Adicione as seguintes chaves com seus respectivos valores do Supabase:
+     ```env
+     VITE_SUPABASE_URL=sua-url-do-supabase
+     VITE_SUPABASE_ANON_KEY=sua-chave-anon-do-supabase
      ```
-   - Preencha as chaves do **Supabase** no arquivo `.env`.
 
 4. **Inicie o servidor de desenvolvimento:**
    ```bash
    npm run dev
    ```
+
+## Deploy na Vercel
+
+O projeto está pronto para ser hospedado na **Vercel**. Para fazer o deploy:
+
+1. Importe o repositório do GitHub na Vercel.
+2. Nas configurações de **Environment Variables**, adicione:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+3. A Vercel detectará automaticamente o framework (Vite) e o comando de build (`npm run build`).
 
 ## Segurança
 
