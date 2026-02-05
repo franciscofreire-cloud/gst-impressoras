@@ -1,6 +1,6 @@
 # Sistema de Controle Patrimonial de Impressoras - PCCE
 
-Este é um sistema desenvolvido para a Polícia Civil do Ceará (PCCE) para gerenciar o patrimônio de impressoras, monitorar a coleta de dados e centralizar informações de IP, SELB e números de série.
+Este é um sistema desenvolvido para gerenciar o patrimônio de impressoras, monitorar a coleta de dados e centralizar informações de IP, SELB e números de série.
 
 ## Tecnologias Utilizadas
 
