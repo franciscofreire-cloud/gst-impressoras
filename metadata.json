@@ -1,0 +1,5 @@
+{
+  "name": "Selbetti - Sistema de Controle Patrimonial de Impressoras",
+  "description": "Um sistema administrativo robusto para gestão de ativos de impressão em delegacias, com rastreamento de status, histórico de alterações e indicadores de desempenho (KPIs).",
+  "requestFramePermissions": []
+}
