@@ -9,7 +9,9 @@ import {
   Settings as SettingsIcon,
   Users as UsersIcon,
   Search,
-  Bell
+  Bell,
+  Menu,
+  X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { Printer, HistoryEntry, InstallMode, CollectingStatus, User, UserRole } from './types';
@@ -24,7 +26,10 @@ import LoginView from './components/LoginView';
 import { supabase, sessionlessSupabase } from './lib/supabase';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'history' | 'settings' | 'users'>('inventory');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'history' | 'settings' | 'users'>(() => {
+    const savedTab = localStorage.getItem('activeTab');
+    return (savedTab as any) || 'inventory';
+  });
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [userList, setUserList] = useState<User[]>([]);
@@ -32,6 +37,7 @@ const App: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPrinter, setEditingPrinter] = useState<Printer | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -57,6 +63,10 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
+
   const handleSession = async (session: any) => {
     const { data: profile } = await supabase
       .from('profiles')
@@ -72,8 +82,13 @@ const App: React.FC = () => {
         isAuthenticated: true
       };
       setActiveUser(user);
-      if (user.role === 'admin') setActiveTab('dashboard');
-      else setActiveTab('inventory');
+
+      // If no valid tab is set or saved, set default based on role
+      const savedTab = localStorage.getItem('activeTab');
+      if (!savedTab || (user.role !== 'admin' && ['dashboard', 'history', 'users', 'settings'].includes(savedTab))) {
+        if (user.role === 'admin') setActiveTab('dashboard');
+        else setActiveTab('inventory');
+      }
 
       // Fetch initial data
       fetchPrinters();
@@ -211,7 +226,6 @@ const App: React.FC = () => {
         }
 
         const printersToInsert: any[] = rawData.map(row => {
-          // Helper to find a value by searching keys for any of the aliases
           const getVal = (aliases: string[]) => {
             const key = Object.keys(row).find(k => {
               const normalizedK = k.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -232,7 +246,6 @@ const App: React.FC = () => {
           const station = getVal(['DELEGACIA', 'UNIDADE', 'LOCAL', 'POSTO']);
           const address = getVal(['ENDEREÇO', 'ENDERECO', 'LOGRADOURO']);
 
-          // Normalize constants to match database constraints
           let normalizedInstallMode = 'Rede';
           const upMode = installMode.toUpperCase();
           if (upMode.includes('USB')) normalizedInstallMode = 'USB';
@@ -301,7 +314,6 @@ const App: React.FC = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Inventário");
 
-    // Auto-size columns (basic implementation)
     const maxWidths = Object.keys(dataToExport[0]).map(key => ({
       wch: Math.max(key.length, ...dataToExport.map(row => String(row[key as keyof typeof row] || '').length)) + 2
     }));
@@ -327,8 +339,6 @@ const App: React.FC = () => {
 
   const handleCreateUser = async (u: Omit<User, 'id' | 'isAuthenticated'>) => {
     const email = `${u.username}@sistema.local`;
-
-    // Use sessionless client to avoid logging out the current admin
     const { data, error } = await sessionlessSupabase.auth.signUp({
       email,
       password: u.password!,
@@ -394,11 +404,20 @@ const App: React.FC = () => {
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none z-0"
         style={{ backgroundImage: 'radial-gradient(#000 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
 
-      <aside className="w-[280px] h-screen fixed left-0 top-0 bg-pcce-dark text-white z-30 flex flex-col px-6 py-8 border-r border-white/5">
-        <div className="flex items-center mb-12 px-2">
-          <div>
-            <h2 className="font-black text-xl tracking-tight leading-none uppercase">IMPRESSORAS PCCE</h2>
-          </div>
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`w-[280px] h-screen fixed left-0 top-0 bg-pcce-dark text-white z-50 flex flex-col px-6 py-8 border-r border-white/5 transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between mb-12 px-2">
+          <h2 className="font-black text-xl tracking-tight leading-none uppercase">IMPRESSORAS PCCE</h2>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-white">
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1">
@@ -407,7 +426,7 @@ const App: React.FC = () => {
           {isAdmin && (
             <SidebarItem
               active={activeTab === 'dashboard'}
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }}
               icon={<LayoutDashboard size={20} />}
               label="Visão Geral"
             />
@@ -415,7 +434,7 @@ const App: React.FC = () => {
 
           <SidebarItem
             active={activeTab === 'inventory'}
-            onClick={() => setActiveTab('inventory')}
+            onClick={() => { setActiveTab('inventory'); setIsSidebarOpen(false); }}
             icon={<PrinterIcon size={20} />}
             label="Ativos de Impressão"
           />
@@ -423,7 +442,7 @@ const App: React.FC = () => {
           {isAdmin && (
             <SidebarItem
               active={activeTab === 'history'}
-              onClick={() => setActiveTab('history')}
+              onClick={() => { setActiveTab('history'); setIsSidebarOpen(false); }}
               icon={<History size={20} />}
               label="Logs do Sistema"
             />
@@ -435,13 +454,13 @@ const App: React.FC = () => {
               <>
                 <SidebarItem
                   active={activeTab === 'users'}
-                  onClick={() => setActiveTab('users')}
+                  onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }}
                   icon={<UsersIcon size={20} />}
                   label="Controle de Acessos"
                 />
                 <SidebarItem
                   active={activeTab === 'settings'}
-                  onClick={() => setActiveTab('settings')}
+                  onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}
                   icon={<SettingsIcon size={20} />}
                   label="Configurações"
                 />
@@ -472,8 +491,19 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      <main className="flex-1 ml-[280px] relative z-10 px-10 py-8 min-h-screen">
-        <header className="flex justify-between items-end mb-10">
+      <main className="flex-1 md:ml-[280px] relative z-10 px-4 py-6 md:px-10 md:py-8 min-h-screen transition-all">
+        {/* Mobile Header Top Bar */}
+        <div className="md:hidden flex items-center justify-between mb-6 bg-white p-4 -mx-4 -mt-6 border-b border-gray-100 shadow-sm sticky top-0 z-20">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-pcce hover:bg-pcce-light rounded-xl transition-all">
+            <Menu size={24} />
+          </button>
+          <h2 className="font-black text-sm tracking-tight uppercase text-pcce">IMPRESSORAS PCCE</h2>
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pcce to-pcce-accent flex items-center justify-center font-bold text-xs text-white">
+            {activeUser.username.charAt(0).toUpperCase()}
+          </div>
+        </div>
+
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8 md:mb-10">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full bg-pcce-accent" />
@@ -490,17 +520,17 @@ const App: React.FC = () => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-gray-200 text-gray-500 hover:text-pcce hover:border-pcce/20 transition-all shadow-sm">
               <Bell size={20} />
             </button>
             {activeTab === 'inventory' && isAdmin && (
               <button
                 onClick={() => { setEditingPrinter(null); setIsFormOpen(true); }}
-                className="flex items-center gap-2 bg-pcce text-white px-6 py-3.5 rounded-2xl hover:bg-pcce-success transition-all shadow-lg shadow-pcce/20 font-bold"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-pcce text-white px-6 py-3.5 rounded-2xl hover:bg-pcce-success transition-all shadow-lg shadow-pcce/20 font-bold text-sm"
               >
                 <Plus size={20} />
-                Novo Registro
+                <span>Novo Registro</span>
               </button>
             )}
           </div>

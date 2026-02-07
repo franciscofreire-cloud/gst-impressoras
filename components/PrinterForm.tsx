@@ -53,9 +53,9 @@ const PrinterForm: React.FC<PrinterFormProps> = ({ onClose, onSave, initialData 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-pcce-dark/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-pcce-dark/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white w-full max-w-2xl rounded-t-3xl md:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full md:slide-in-from-bottom-0 md:zoom-in-95 duration-300 max-h-[95vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 md:p-6 border-b border-slate-100 bg-slate-50 shrink-0">
           <div>
             <h2 className="text-xl font-bold text-slate-900">
               {initialData ? 'Editar Impressora' : 'Cadastrar Nova Impressora'}
@@ -66,11 +66,11 @@ const PrinterForm: React.FC<PrinterFormProps> = ({ onClose, onSave, initialData 
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-all"
           >
-            <X size={24} />
+            <X size={20} md:size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-6 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-bold text-slate-700">SELB (Patrimônio)</label>
@@ -114,25 +114,25 @@ const PrinterForm: React.FC<PrinterFormProps> = ({ onClose, onSave, initialData 
 
             <div className="space-y-2">
               <label className="block text-sm font-bold text-slate-700">Modo de Instalação</label>
-              <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, installMode: InstallMode.NETWORK }))}
-                  className={`py-2 text-sm font-medium rounded-lg transition-all ${formData.installMode === InstallMode.NETWORK ? 'bg-white text-pcce shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`py-2.5 text-xs font-medium rounded-lg transition-all ${formData.installMode === InstallMode.NETWORK ? 'bg-white text-pcce shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   Rede
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, installMode: InstallMode.USB }))}
-                  className={`py-2 text-sm font-medium rounded-lg transition-all ${formData.installMode === InstallMode.USB ? 'bg-white text-pcce shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`py-2.5 text-xs font-medium rounded-lg transition-all ${formData.installMode === InstallMode.USB ? 'bg-white text-pcce shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   USB
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, installMode: InstallMode.BACKUP }))}
-                  className={`py-2 text-sm font-medium rounded-lg transition-all ${formData.installMode === InstallMode.BACKUP ? 'bg-white text-pcce shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`py-2.5 text-xs font-medium rounded-lg transition-all ${formData.installMode === InstallMode.BACKUP ? 'bg-white text-pcce shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   Backup
                 </button>
@@ -141,18 +141,18 @@ const PrinterForm: React.FC<PrinterFormProps> = ({ onClose, onSave, initialData 
 
             <div className="space-y-2">
               <label className="block text-sm font-bold text-slate-700">Status de Coleta</label>
-              <div className="flex gap-4 p-1 bg-slate-100 rounded-xl">
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, collecting: CollectingStatus.YES }))}
-                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${formData.collecting === CollectingStatus.YES ? 'bg-green-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`flex-1 py-2.5 text-xs font-medium rounded-lg transition-all ${formData.collecting === CollectingStatus.YES ? 'bg-emerald-600 text-white shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   Sim
                 </button>
                 <button
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, collecting: CollectingStatus.NO }))}
-                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${formData.collecting === CollectingStatus.NO ? 'bg-red-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  className={`flex-1 py-2.5 text-xs font-medium rounded-lg transition-all ${formData.collecting === CollectingStatus.NO ? 'bg-rose-600 text-white shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   Não
                 </button>
@@ -199,17 +199,17 @@ const PrinterForm: React.FC<PrinterFormProps> = ({ onClose, onSave, initialData 
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 flex justify-end gap-3">
+          <div className="pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 text-slate-600 font-medium hover:bg-slate-100 rounded-xl transition-all"
+              className="w-full md:w-auto order-2 md:order-1 px-6 py-3 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-all"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-8 py-2.5 bg-pcce text-white font-bold rounded-xl hover:bg-pcce-success transition-all shadow-lg shadow-pcce/20 flex items-center gap-2"
+              className="w-full md:w-auto order-1 md:order-2 px-8 py-3 bg-pcce text-white font-bold rounded-xl hover:bg-pcce-success transition-all shadow-lg shadow-pcce/20 flex items-center justify-center gap-2"
             >
               <Save size={20} />
               {initialData ? 'Salvar Alterações' : 'Confirmar Cadastro'}
