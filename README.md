@@ -1,4 +1,4 @@
-# Sistema de Controle Patrimonial de Impressoras - PCCE
+# Sistema de Controle Patrimonial de Impressoras
 
 Este é um sistema desenvolvido para gerenciar o patrimônio de impressoras, monitorar a coleta de dados e centralizar informações de IP, SELB e números de série.
 
